@@ -224,138 +224,56 @@ topics = list(set(topics))
 # 1) checking for an exact match
 # 2) checking for a semantically similar match    
 
-# google news model
-# model = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)
-# good model, but takes a long time to load as it contains very large set of embeddings
+def sum_similarity_scores(label, topics, model): #topics=topics, model=model):
+    """ Function that loops through all extracted topics, gets the
+    similarity score of that topic with a label, sums all similarity
+    scores and then outputs the total similarity score """    
+    test_score = []
+    for t in topics:
+        if t in model.vocab:
+            if label in model.vocab:
+                score = model.similarity(label, t)
+            else:
+                score = 0
+            test_score.append(score)
+    return(np.sum(test_score)) 
 
-# read in labels and their synsets
+
+def average_similarity_scores(label, topics, model): #topics=topics, model=model):
+    """ Function that loops through all extracted topics, gets the
+    similarity score of that topic with a label, averages all similarity
+    scores and then outputs the average similarity score """    
+    test_score = []
+    for t in topics:
+        if t in model.vocab:
+            if label in model.vocab:
+                score = model.similarity(label, t)
+            else:
+                score = 0
+            test_score.append(score)
+    return(np.mean(test_score)) 
+
+
+
+# read in labels
 labels = pd.read_csv('Dic_4.csv', sep=";")
-labels['synsets'] = labels['synsets'].str.replace('[^\w\s]','')
+relevant_labels = list(labels.label)
+relevant_labels = [label.lower() for label in relevant_labels]
+scores = dict.fromkeys(relevant_labels, 0)
 
+# get max score
+for l in relevant_labels:
+    score = sum_similarity_scores(l, topics, word_vectors)
+    scores[l] = score
+    
+#  check all scores
+print(scores)
 
-# to do: rewrite and loop over different categories, now still hard-coded
-# as this was written when I was tired at the end of long day in Hackaton...
-def check_identical_words(topics):
-    """ Function that looks for similar words within the topics and the labels and 
-    their synsets """
-    categories = []
-    for word in topics:
-        if labels.loc[labels['label'] == 'Nutrition', 'synsets'].str.contains(word).any():
-            category = 'Nutrition'
-            categories.append(category)
-        elif labels.loc[labels['label'] == 'Protection', 'synsets'].str.contains(word).any():
-            category = 'Protection'
-            categories.append(category)
-        elif labels.loc[labels['label'] == 'Logistics', 'synsets'].str.contains(word).any():
-            category = 'Logistics'
-            categories.append(category)
-        elif labels.loc[labels['label'] == 'Health', 'synsets'].str.contains(word).any():
-            category = 'Health'
-            categories.append(category)
-        elif labels.loc[labels['label'] == 'Shelter', 'synsets'].str.contains(word).any():
-            category = 'Shelter'
-            categories.append(category)
-        elif labels.loc[labels['label'] == 'Water/Sanitation/Hygiene', 'synsets'].str.contains(word).any():
-            category = 'Water/Sanitation/Hygiene'
-            categories.append(category)  
-        elif labels.loc[labels['label'] == 'Camp Coordination and Camp Management', 'synsets'].str.contains(word).any():
-            category = 'Camp Coordination and Camp Management'
-            categories.append(category)   
-        elif labels.loc[labels['label'] == 'Education', 'synsets'].str.contains(word).any():
-            category = 'Education'
-            categories.append(category)  
-        elif labels.loc[labels['label'] == 'Emergency Telecommunications', 'synsets'].str.contains(word).any():
-            category = 'Emergency Telecommunications'
-            categories.append(category) 
-        elif labels.loc[labels['label'] == 'Food security', 'synsets'].str.contains(word).any():
-            category = 'Food security'
-            categories.append(category) 
-        else:
-            category = 'unknown'
-            categories.append(category)
-    #categories = list(set(categories))
-    return(categories)
-
-categories = check_identical_words(topics)
-most_common_label = [word for word, word_count in Counter(categories).most_common(1)]
-
-# to do: rewrite and loop over different categories, now still hard-coded
-# as this was written when I was tired at the end of long day in Hackaton...
-def get_similar_words(df):
-    """ Function that determines summed similarity of first 4 words in topic
-    per label, and then assigns label with highest score """
-    
-    Nutrition_score = (word_vectors.similarity('nutrition', topics[0]) + 
-                       word_vectors.similarity('nutrition', topics[1]) + 
-                       word_vectors.similarity('nutrition', topics[2]) + 
-                       word_vectors.similarity('nutrition', topics[3]))
-    
-    Protection_score = (word_vectors.similarity('protection', topics[0]) + 
-                       word_vectors.similarity('protection', topics[1]) + 
-                       word_vectors.similarity('protection', topics[2]) + 
-                       word_vectors.similarity('protection', topics[3]))
-    
-    Logistics_score = (word_vectors.similarity('logistics', topics[0]) + 
-                       word_vectors.similarity('logistics', topics[1]) + 
-                       word_vectors.similarity('logistics', topics[2]) + 
-                       word_vectors.similarity('logistics', topics[3]))
-    
-    Health_score = (word_vectors.similarity('health', topics[0]) + 
-                       word_vectors.similarity('health', topics[1]) + 
-                       word_vectors.similarity('health', topics[2]) + 
-                       word_vectors.similarity('health', topics[3]))
-    
-    Shelter_score = (word_vectors.similarity('shelter', topics[0]) + 
-                       word_vectors.similarity('shelter', topics[1]) + 
-                       word_vectors.similarity('shelter', topics[2]) + 
-                       word_vectors.similarity('shelter', topics[3]))
-    
-    Hygiene_score = (word_vectors.similarity('hygiene', topics[0]) + 
-                       word_vectors.similarity('hygiene', topics[1]) + 
-                       word_vectors.similarity('hygiene', topics[2]) + 
-                       word_vectors.similarity('hygiene', topics[3]))
-    
-    Camp_score = (word_vectors.similarity('camp', topics[0]) + 
-                       word_vectors.similarity('camp', topics[1]) + 
-                       word_vectors.similarity('camp', topics[2]) + 
-                       word_vectors.similarity('camp', topics[3]))
-    
-    Food_score = (word_vectors.similarity('food', topics[0]) + 
-                       word_vectors.similarity('food', topics[1]) + 
-                       word_vectors.similarity('food', topics[2]) + 
-                       word_vectors.similarity('food', topics[3]))
-
-    Education_score = (word_vectors.similarity('education', topics[0]) + 
-                       word_vectors.similarity('education', topics[1]) + 
-                       word_vectors.similarity('education', topics[2]) + 
-                       word_vectors.similarity('education', topics[3]))
-    
-    Telecommunication_score = (word_vectors.similarity('telecommunication', topics[0]) + 
-                       word_vectors.similarity('telecommunication', topics[1]) + 
-                       word_vectors.similarity('telecommunication', topics[2]) + 
-                       word_vectors.similarity('telecommunication', topics[3]))
-    
-    scores = {'Nutrition':Nutrition_score, 'Protection':Protection_score, 'Logistics':Logistics_score, 
-              'Health':Health_score, 'Shelter':Shelter_score, 'Hygiene':Hygiene_score, 
-              'Camp':Camp_score, 'Food':Food_score, 'Education':Education_score, 
-              'Telecommunication':Telecommunication_score} 
-    
-    label_text = max(scores, key=scores.get)
-    
-    return(label_text)
-
-
-# Assign the category of the text to the variable 'label_text'
-if most_common_label != ['unknown']:
-    label_text = most_common_label
-else:
-    label_text = get_similar_words(topics)
-    
-    
-    
-# print the category of the text
+# get most likely label
+label_text = max(scores, key=scores.get)
 print(label_text)
 
 
+    
 
     
