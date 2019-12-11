@@ -57,11 +57,10 @@ Created on Sat Jun 15 09:56:30 2019
 
 # load packages
 import pandas as pd
-import os
 import nltk
 import numpy as np
 # import re
-from collections import Counter
+# from collections import Counter
 # from gensim.models import Word2Vec
 import gensim.downloader as api
 from nltk.tokenize import word_tokenize
@@ -75,18 +74,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 # for future improvement: spaCy  -- somehow pip failed at installing it
 
 
-
-# change to your own wd
-os.chdir("C:/Users/saskia.lensink/OneDrive/HackatonTWB")
 # load pre-trained word embeddings
 word_vectors = api.load("glove-wiki-gigaword-100")  
 
 
 # # 1. Load data
 
-text = pd.read_csv("docs/201403_women_and_migration_SKR.docx.sdlxliff.csv", sep=";")
-## Result = Education
-# text = pd.read_csv("docs/APRIL_2019_-_send_out_for_translation.docx_sdlxliff.csv", sep=";")
+text = pd.read_csv("docs/APRIL_2019_-_send_out_for_translation.docx_sdlxliff.csv", sep=";")
 ## result = Education
 # text = pd.read_csv("docs/Disability_Inclusion_and_Etiquette_Training_presentation_text.docx.sdlxliff.csv", ";")
 ## result = health
@@ -256,7 +250,7 @@ def average_similarity_scores(label, topics, model): #topics=topics, model=model
 
 
 # read in labels
-labels = pd.read_csv('Dic_4.csv', sep=";")
+labels = pd.read_csv('dic_4.csv', sep=";")
 relevant_labels = list(labels.label)
 relevant_labels = [label.lower() for label in relevant_labels]
 scores = dict.fromkeys(relevant_labels, 0)
